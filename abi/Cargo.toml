@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+prost = "0.13.3"
+prost-types = "0.13.3"
+tonic = { version = "0.12.3", features = ["gzip"] }
+
+[build-dependencies]
+# 根据grpc的proto生成对应客户端的代码
+tonic-build = "0.12.3"

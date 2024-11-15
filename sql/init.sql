@@ -1,3 +1,4 @@
+create database reservation;
 create schema rsvp;
 create type rsvp.reservation_status as enum ('unknown','pending','confirmed','blocked');
 create type rsvp.reservation_update_type as enum ('unknown', 'create', 'update', 'delete');
@@ -8,13 +9,12 @@ create type rsvp.reservation_update_type as enum ('unknown', 'create', 'update',
 -- SELECT int4range(10, 20) * int4range(15, 25) 两个范围是否相交,返回交集 -> int4range(15, 20)
 create table rsvp.reservations
 (
-    id uuid not null, -- default uuid_generate_v4(),
+    id     uuid                    not null default gen_random_uuid(),
     user_id     varchar(64)             not null,
-    status      rsvp.reservation_status not null
-        default 'pending',
+    status rsvp.reservation_status not null default 'pending',
     resource_id varchar(64)             not null,
     timespan    tstzrange               not null,
-    Note        text,
+    note   text,
     constraint pk_reservations primary key (id),
     -- 排除约束：
     -- using git：指定约束的索引类型，即通用搜索树
@@ -39,11 +39,20 @@ create or replace function rsvp.query(uid text, rid text, during tstzrange)
                 status      rsvp.reservation_status,
                 resource_id varchar(64),
                 timespan    tstzrange,
-                Note        text
+                note text
             )
 as
 $$
 begin
+    if uid is null and rid is null then
+        return query select * from rsvp.reservations where during @> timespan;
+    elsif uid is null then
+        return query select * from rsvp.reservations where resource_id = rid and during @> timespan;
+    elsif rid is null then
+        return query select * from rsvp.reservations where user_id = uid and during @> timespan;
+    else
+        return query select * from rsvp.reservations where user_id = uid and resource_id = rid and during @> timespan;
+    end if;
 end;
 $$ language plpgsql;
 
@@ -56,8 +65,7 @@ create table rsvp.reservation_changes
 );
 
 -- trigger for add/update/delete a reservation
-create or replace function rsvp.reservation_trigger()
-    returns trigger as
+create or replace function rsvp.reservation_trigger() returns trigger as
 $$
 begin
     if tg_op = 'INSERT' then

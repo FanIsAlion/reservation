@@ -173,7 +173,9 @@ pub struct ListenResponse {
     pub reservation: ::core::option::Option<Reservation>,
 }
 /// reservation status for a given time period
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[derive(
+    sqlx::Type, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
+)]
 #[repr(i32)]
 pub enum ReservationStatus {
     Unknown = 0,
@@ -269,7 +271,7 @@ pub mod reservation_service_client {
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
-        T::ResponseBody: Body<Data=Bytes> + std::marker::Send + 'static,
+        T::ResponseBody: Body<Data = Bytes> + std::marker::Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + std::marker::Send,
     {
         pub fn new(inner: T) -> Self {
@@ -289,12 +291,12 @@ pub mod reservation_service_client {
             T::ResponseBody: Default,
             T: tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
-                Response=http::Response<
+                Response = http::Response<
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
             <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
-            Into<StdError> + std::marker::Send + std::marker::Sync,
+                Into<StdError> + std::marker::Send + std::marker::Sync,
         {
             ReservationServiceClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -504,9 +506,9 @@ pub mod reservation_service_server {
         ) -> std::result::Result<tonic::Response<super::GetResponse>, tonic::Status>;
         /// Server streaming response type for the query method.
         type queryStream: tonic::codegen::tokio_stream::Stream<
-            Item=std::result::Result<super::Reservation, tonic::Status>,
-        > + std::marker::Send
-        + 'static;
+                Item = std::result::Result<super::Reservation, tonic::Status>,
+            > + std::marker::Send
+            + 'static;
         /// query reservations by resource id, user id, status, start time, end time
         async fn query(
             &self,
@@ -519,9 +521,9 @@ pub mod reservation_service_server {
         ) -> std::result::Result<tonic::Response<super::FilterResponse>, tonic::Status>;
         /// Server streaming response type for the listen method.
         type listenStream: tonic::codegen::tokio_stream::Stream<
-            Item=std::result::Result<super::Reservation, tonic::Status>,
-        > + std::marker::Send
-        + 'static;
+                Item = std::result::Result<super::Reservation, tonic::Status>,
+            > + std::marker::Send
+            + 'static;
         /// another system could monitor newly added/confirmed/cancelled reservations
         async fn listen(
             &self,
@@ -801,12 +803,12 @@ pub mod reservation_service_server {
                     #[allow(non_camel_case_types)]
                     struct querySvc<T: ReservationService>(pub Arc<T>);
                     impl<T: ReservationService>
-                    tonic::server::ServerStreamingService<super::QueryRequest> for querySvc<T>
+                        tonic::server::ServerStreamingService<super::QueryRequest> for querySvc<T>
                     {
                         type Response = super::Reservation;
                         type ResponseStream = T::queryStream;
                         type Future =
-                        BoxFuture<tonic::Response<Self::ResponseStream>, tonic::Status>;
+                            BoxFuture<tonic::Response<Self::ResponseStream>, tonic::Status>;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::QueryRequest>,
@@ -883,13 +885,13 @@ pub mod reservation_service_server {
                     #[allow(non_camel_case_types)]
                     struct listenSvc<T: ReservationService>(pub Arc<T>);
                     impl<T: ReservationService>
-                    tonic::server::ServerStreamingService<super::ListenRequest>
-                    for listenSvc<T>
+                        tonic::server::ServerStreamingService<super::ListenRequest>
+                        for listenSvc<T>
                     {
                         type Response = super::Reservation;
                         type ResponseStream = T::listenStream;
                         type Future =
-                        BoxFuture<tonic::Response<Self::ResponseStream>, tonic::Status>;
+                            BoxFuture<tonic::Response<Self::ResponseStream>, tonic::Status>;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::ListenRequest>,
